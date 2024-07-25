@@ -57,9 +57,9 @@ TX (4) |----------------------| 4 DI   Gnd 5 |---+------------ Pin 1
 
 #include <inttypes.h>
 #include "SERCOM.h"
-#include <rdm/UID.h>
+#include "rdm/UID.h"
 
-#define DMX_MIN_SLOTS 24
+#define DMX_MIN_SLOTS 1
 #define RDM_MAX_FRAME 257
 #define DMX_MAX_SLOTS 512
 #define DMX_MAX_FRAME 513
@@ -529,7 +529,7 @@ extern LXSAMD21DMX SAMD21DMX;
   	#define use_optional_sercom_macros 1
  #endif
 
-//#define use_optional_sercom_macros 1
+// #define use_optional_sercom_macros 4
 
 #if defined( use_optional_sercom_macros )
 
@@ -643,9 +643,9 @@ extern LXSAMD21DMX SAMD21DMX;
 //********************** optional sercom macros 5 **********************
 // --might be used for SEEED XIAO M0  sercom2 pins 3 and 4
 
-#define PIN_DMX_RX (3ul)
-#define PIN_DMX_TX (4ul)
-#define PAD_DMX_RX SERCOM_RX_PAD_3
+#define PIN_DMX_RX (7ul)
+#define PIN_DMX_TX (6ul)
+#define PAD_DMX_RX SERCOM_RX_PAD_1
 #define PAD_DMX_TX UART_TX_PAD_0
 
 // Set to PIO_SERCOM or PIO_SERCOM_ALT
@@ -653,13 +653,13 @@ extern LXSAMD21DMX SAMD21DMX;
 #define MUX_DMX_TX PIO_SERCOM_ALT
 
 // SERCOMn is pointer to memory address where SERCOM registers are located.
-#define DMX_SERCOM SERCOM2
+#define DMX_SERCOM SERCOM4
 
 // sercomN is C++ wrapper for SERCOMn (passed to UART constructor)
-#define DMX_sercom sercom2
+#define DMX_sercom sercom4
 
 // sercom handler function
-#define DMX_SERCOM_HANDLER_FUNC SERCOM2_Handler
+#define DMX_SERCOM_HANDLER_FUNC SERCOM4_Handler
 
 #warning Using use_optional_sercom_macros = 5
 

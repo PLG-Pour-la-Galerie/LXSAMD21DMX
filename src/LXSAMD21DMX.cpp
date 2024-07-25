@@ -19,7 +19,7 @@
 #include "variant.h"
 #include <inttypes.h>
 #include <stdlib.h>
-#include <rdm/rdm_utility.h>
+#include "rdm/rdm_utility.h"
 
 //**************************************************************************************
 // single instance and shared interrupt status
@@ -29,6 +29,8 @@ LXSAMD21DMX SAMD21DMX;
 UID LXSAMD21DMX::THIS_DEVICE_ID(0x6C, 0x78, 0x00, 0x00, 0x00, 0x04);
 
 uint8_t  _interrupt_mode;
+
+// #define LXSAMD21DMX_DEBUG
 
 // **************************** SERCOMn_Handler  ***************
 // 
@@ -191,6 +193,23 @@ uint8_t* LXSAMD21DMX::receivedRDMData( void ) {
 //************************************************************************************
 
 void LXSAMD21DMX::transmissionComplete( void ) {
+	// Serial.print("_dmx_send_state : ");
+	// Serial.println(_dmx_send_state);
+
+	if (DMX_SERCOM->USART.INTFLAG.bit.ERROR) {
+		Serial.println("UART error");
+	}
+
+	if (DMX_SERCOM->USART.STATUS.bit.BUFOVF) {
+		Serial.println("Buffer overflow error");
+	}
+
+	if (DMX_SERCOM->USART.STATUS.bit.FERR) {
+		Serial.println("Frame error");
+	}
+
+
+
 	if ( _dmx_send_state == DMX_STATE_BREAK ) {
 		setBaudRate(DMX_BREAK_BAUD);
         _dmx_send_state = DMX_STATE_START;
@@ -261,6 +280,9 @@ void LXSAMD21DMX::dataRegisterEmpty( void ) {
 
 void LXSAMD21DMX::printReceivedData( void ) {
 	for(int j=0; j<_next_read_slot; j++) {
+		Serial.print("j : ");
+		Serial.print(j);
+		Serial.print(" : ");
 		Serial.println(_receivedData[j]);
 	}
 }
@@ -278,6 +300,7 @@ void LXSAMD21DMX::packetComplete( void ) {
 					_receive_callback(_slots);
 				}
 			}
+			// printReceivedData();
 		}
 	} else {
 		if ( _receivedData[0] == RDM_START_CODE ) {			//zero start code is RDM
@@ -360,9 +383,9 @@ void LXSAMD21DMX::setRDMReceivedCallback(LXRecvCallback callback) {
 
 void LXSAMD21DMX::outputIRQHandler(void) {
     if ( DMX_SERCOM->USART.INTFLAG.bit.TXC ) {
-    	transmissionComplete();
+		transmissionComplete();
     } else if ( DMX_SERCOM->USART.INTFLAG.bit.DRE ) {
-        dataRegisterEmpty();
+		dataRegisterEmpty();
     }
 }
 
@@ -372,6 +395,7 @@ void LXSAMD21DMX::inputIRQHandler(void) {
 		   DMX_SERCOM->USART.INTFLAG.bit.ERROR = 1;		//acknowledge error, clear interrupt
 		   
 			if ( DMX_SERCOM->USART.STATUS.bit.FERR ) {	//framing error happens when break is sent
+				//Serial.println("Break");
 				breakReceived();
 				return;
 			}
@@ -381,6 +405,7 @@ void LXSAMD21DMX::inputIRQHandler(void) {
 	
 		if ( DMX_SERCOM->USART.INTFLAG.bit.RXC ) {
 			uint8_t incoming_byte = DMX_SERCOM->USART.DATA.reg;				// read buffer to clear interrupt flag
+			// Serial.println("read data");
 			byteReceived(incoming_byte);
 		} // RXC
 	
