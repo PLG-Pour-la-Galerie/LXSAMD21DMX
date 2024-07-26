@@ -529,7 +529,7 @@ extern LXSAMD21DMX SAMD21DMX;
   	#define use_optional_sercom_macros 1
  #endif
 
-// #define use_optional_sercom_macros 4
+#define use_optional_sercom_macros 4
 
 #if defined( use_optional_sercom_macros )
 
